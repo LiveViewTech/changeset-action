@@ -1,0 +1,364 @@
+version: 1
+facts:
+  languages:
+    - id: lang-typescript
+      value: TypeScript
+      evidence:
+        - tsconfig.json
+        - package.json
+        - src/index.ts
+    - id: lang-javascript
+      value: JavaScript
+      evidence:
+        - rollup.config.js
+  frameworks:
+    - id: fw-github-actions
+      value: GitHub Actions
+      evidence:
+        - action.yml
+        - package.json
+    - id: fw-vitest
+      value: Vitest
+      evidence:
+        - package.json
+        - src/run.test.ts
+    - id: fw-rollup
+      value: Rollup
+      evidence:
+        - package.json
+        - rollup.config.js
+    - id: fw-typescript
+      value: TypeScript
+      evidence:
+        - package.json
+        - tsconfig.json
+  commands:
+    - id: cmd-build
+      name: build
+      value: rollup -c
+      evidence:
+        - package.json#scripts.build
+    - id: cmd-test
+      name: test
+      value: vitest
+      evidence:
+        - package.json#scripts.test
+    - id: cmd-test-watch
+      name: test:watch
+      value: yarn test --watch
+      evidence:
+        - package.json#scripts.test:watch
+    - id: cmd-typecheck
+      name: typecheck
+      value: tsc
+      evidence:
+        - package.json#scripts.typecheck
+    - id: cmd-changeset
+      name: changeset
+      value: changeset
+      evidence:
+        - package.json#scripts.changeset
+    - id: cmd-bump
+      name: bump
+      value: "node --experimental-strip-types ./scripts/bump.ts"
+      evidence:
+        - package.json#scripts.bump
+    - id: cmd-release
+      name: release
+      value: "node --experimental-strip-types ./scripts/release.ts"
+      evidence:
+        - package.json#scripts.release
+    - id: cmd-release-pr
+      name: release:pr
+      value: "node --experimental-strip-types ./scripts/release-pr.ts"
+      evidence:
+        - package.json#scripts.release:pr
+  entry_points:
+    - id: entry-src-index
+      value: src/index.ts
+      evidence:
+        - src/index.ts
+        - rollup.config.js
+    - id: entry-action-yml
+      value: action.yml
+      evidence:
+        - action.yml
+    - id: entry-dist-index
+      value: dist/index.js
+      evidence:
+        - action.yml
+        - package.json
+        - rollup.config.js
+  components:
+    - id: comp-src
+      name: Action runtime
+      path: src
+      evidence:
+        - src/index.ts
+        - src/run.ts
+        - src/git.ts
+        - src/octokit.ts
+    - id: comp-scripts
+      name: Release scripts
+      path: scripts
+      evidence:
+        - scripts/bump.ts
+        - scripts/release.ts
+        - scripts/release-pr.ts
+        - package.json
+    - id: comp-fixtures
+      name: Test fixtures
+      path: __fixtures__
+      evidence:
+        - __fixtures__/simple-project/package.json
+        - __fixtures__/ignored-package/package.json
+        - src/run.test.ts
+    - id: comp-github
+      name: CI and workflows
+      path: .github
+      evidence:
+        - .github/workflows/ci.yml
+        - .github/workflows/version-or-publish.yml
+        - .github/actions/ci-setup/action.yml
+  dependencies:
+    - id: dep-actions-core
+      name: "@actions/core"
+      type: external
+      evidence:
+        - package.json
+        - src/index.ts
+    - id: dep-actions-exec
+      name: "@actions/exec"
+      type: external
+      evidence:
+        - package.json
+        - src/run.ts
+    - id: dep-actions-github
+      name: "@actions/github"
+      type: external
+      evidence:
+        - package.json
+        - src/octokit.ts
+    - id: dep-changesets-read
+      name: "@changesets/read"
+      type: external
+      evidence:
+        - package.json
+        - src/readChangesetState.ts
+    - id: dep-changesets-pre
+      name: "@changesets/pre"
+      type: external
+      evidence:
+        - package.json
+        - src/readChangesetState.ts
+    - id: dep-changesets-ghcommit
+      name: "@changesets/ghcommit"
+      type: external
+      evidence:
+        - package.json
+        - src/git.ts
+    - id: dep-manypkg-get-packages
+      name: "@manypkg/get-packages"
+      type: external
+      evidence:
+        - package.json
+        - src/run.ts
+    - id: dep-octokit-throttling
+      name: "@octokit/plugin-throttling"
+      type: external
+      evidence:
+        - package.json
+        - src/octokit.ts
+    - id: dep-semver
+      name: semver
+      type: external
+      evidence:
+        - package.json
+        - src/run.ts
+    - id: dep-unified
+      name: unified
+      type: external
+      evidence:
+        - package.json
+        - src/utils.ts
+    - id: dep-vitest
+      name: vitest
+      type: external
+      evidence:
+        - package.json
+        - src/run.test.ts
+    - id: dep-rollup
+      name: rollup
+      type: external
+      evidence:
+        - package.json
+        - rollup.config.js
+    - id: dep-typescript
+      name: typescript
+      type: external
+      evidence:
+        - package.json
+        - tsconfig.json
+    - id: dep-fixturez
+      name: fixturez
+      type: external
+      evidence:
+        - package.json
+        - src/run.test.ts
+        - types/fixturez.d.ts
+    - id: dep-husky
+      name: husky
+      type: external
+      evidence:
+        - package.json
+  external_services:
+    - id: svc-github-api
+      value: GitHub API
+      evidence:
+        - src/octokit.ts
+        - src/run.ts
+        - action.yml
+        - README.md
+    - id: svc-npm-registry
+      value: npm registry
+      evidence:
+        - src/index.ts
+        - README.md
+  testing:
+    - id: test-vitest
+      framework: Vitest
+      evidence:
+        - package.json
+        - src/run.test.ts
+        - src/utils.test.ts
+        - .github/workflows/ci.yml
+analysis:
+  purpose:
+    value: "GitHub Action that automates Changesets-based releases: opens or updates a version PR when changesets exist, and optionally publishes packages to npm and creates GitHub releases when none remain."
+    confidence: high
+    evidence_refs:
+      - entry-action-yml
+      - entry-src-index
+      - comp-src
+      - svc-github-api
+      - svc-npm-registry
+  architecture:
+    value: "src/index.ts validates inputs and GITHUB_TOKEN, builds Octokit plus a Git helper (git-cli or github-api commitMode), then branches: no changesets plus a publish script calls runPublish; changesets with releases call runVersion to bump on changeset-release/<branch>, push, and open or update a PR; all-empty changesets exit without a PR. Changelog markdown is parsed in utils for PR bodies and GitHub release notes."
+    confidence: high
+    evidence_refs:
+      - entry-src-index
+      - comp-src
+      - dep-actions-core
+      - dep-changesets-read
+      - dep-changesets-ghcommit
+      - svc-github-api
+  patterns:
+    - id: pat-dual-commit-mode
+      value: "Git operations switch on commitMode: local git CLI with force-push, or @changesets/ghcommit via Octokit for signed API commits."
+      confidence: high
+      evidence_refs:
+        - entry-src-index
+        - comp-src
+        - dep-changesets-ghcommit
+        - entry-action-yml
+    - id: pat-fixturez-temp-copies
+      value: "Integration-style tests copy __fixtures__ trees with fixturez, symlink node_modules, mock @actions/github, and assert PR creation."
+      confidence: high
+      evidence_refs:
+        - test-vitest
+        - comp-fixtures
+        - dep-fixturez
+    - id: pat-esm-ts-extensions
+      value: "Runtime and tests are ESM TypeScript with explicit .ts import specifiers; Rollup+esbuild bundles src/index.ts to dist/index.js for the action."
+      confidence: high
+      evidence_refs:
+        - lang-typescript
+        - fw-rollup
+        - entry-src-index
+        - entry-dist-index
+        - cmd-build
+    - id: pat-self-release-dogfood
+      value: "This repo releases itself via changesets/action locally (./) with yarn bump / yarn release, force-adding gitignored dist onto version-line branches."
+      confidence: high
+      evidence_refs:
+        - comp-scripts
+        - comp-github
+        - cmd-bump
+        - cmd-release
+  component_notes:
+    - ref: comp-src
+      purpose: "Implements the published GitHub Action: input handling, changeset state, version PR flow, publish/tag/release flow, git and Octokit helpers, changelog utilities."
+      confidence: high
+    - ref: comp-scripts
+      purpose: "Maintainer release tooling for this action package itself (version bump + README pin, publish dist to vN branch, snapshot PR releases)."
+      confidence: high
+    - ref: comp-fixtures
+      purpose: "Minimal multi-package Changesets workspaces used as disposable copies in Vitest."
+      confidence: high
+    - ref: comp-github
+      purpose: "CI typecheck/test, dogfood version-or-publish on main, and /release-pr comment workflow for snapshot action builds."
+      confidence: high
+  service_notes:
+    - ref: svc-github-api
+      purpose: "Create/update version PRs, create git refs/tags, create GitHub Releases, and optionally commit via API."
+      integration: "Requires GITHUB_TOKEN; Octokit from @actions/github with throttling plugin; rate-limit retries up to 2."
+      confidence: high
+    - ref: svc-npm-registry
+      purpose: "Target of user-supplied publish scripts when no changesets remain."
+      integration: "Action writes or appends //registry.npmjs.org/:_authToken=${NPM_TOKEN} into ~/.npmrc when publishing unless an auth line already exists."
+      confidence: high
+  dangerous_areas:
+    - id: danger-force-push-version-branch
+      value: "git-cli commitMode force-pushes HEAD to the version branch (changeset-release/*)."
+      reason: "Rewrites remote branch history; unsafe if humans commit on that branch or if concurrent runs race."
+      confidence: high
+      evidence_refs:
+        - comp-src
+        - entry-src-index
+    - id: danger-netrc-and-npmrc-secrets
+      value: "Action writes GITHUB_TOKEN into ~/.netrc and may write NPM_TOKEN into ~/.npmrc."
+      reason: "Credentials land on the runner filesystem; custom steps that dump home dir or reuse the workspace can leak tokens."
+      confidence: high
+      evidence_refs:
+        - entry-src-index
+        - svc-npm-registry
+        - svc-github-api
+    - id: danger-publish-stdout-parsing
+      value: "runPublish detects published packages by regex-matching New tag: lines in publish command stdout."
+      reason: "Custom publish scripts that change or suppress that output will skip tags/releases or mis-attribute packages."
+      confidence: high
+      evidence_refs:
+        - comp-src
+        - svc-npm-registry
+    - id: danger-self-release-force-push
+      value: "scripts/release.ts and scripts/release-pr.ts force-add dist and force-push to release-line / pr-release branches."
+      reason: "Destructive git history rewrite of published action refs; mistakes can break consumers pinned to those branches."
+      confidence: high
+      evidence_refs:
+        - comp-scripts
+        - cmd-release
+        - cmd-release-pr
+        - comp-github
+  questions:
+    - id: q-fork-divergence
+      question: "This checkout remotes as LiveViewTech/changeset-action while package metadata and README still describe upstream changesets/action. Which divergences from upstream are intentional for LiveViewTech, and what is the expected sync/publish process for the fork?"
+      area: ownership
+      priority: high
+      evidence_refs:
+        - entry-action-yml
+        - comp-src
+    - id: q-dist-in-consumer-tags
+      question: "dist/ is gitignored and absent in a clean checkout, yet action.yml main is dist/index.js and release scripts force-add dist onto vN branches. Is consumer usage expected only via those release branches/tags, never from main source?"
+      area: release
+      priority: medium
+      evidence_refs:
+        - entry-dist-index
+        - entry-action-yml
+        - cmd-release
+        - comp-scripts
+    - id: q-empty-husky-hooks
+      question: "package.json defines husky with empty hooks. Is that intentional leftover config, or should pre-commit/push hooks be restored?"
+      area: tooling
+      priority: low
+      evidence_refs:
+        - dep-husky
