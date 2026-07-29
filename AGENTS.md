@@ -29,7 +29,7 @@ CI runs `yarn typecheck` and `yarn test` via `.github/workflows/ci.yml` (setup: 
 
 ## Conventions
 
-- Branch for this intelligence refresh work: follow repo PR norms; Changesets release PRs use `changeset-release/<base>`.
+- Version PRs use branch `changeset-release/<base>` (`src/run.ts`).
 - ESM only (`"type": "module"`); import local modules with `.ts` extensions (see `src/index.ts`).
 - `tsconfig.json`: `strict`, `verbatimModuleSyntax`, `noEmit` (typecheck only; ship via Rollup).
 - Do not commit `dist/` on feature branches — it is gitignored; release scripts force-add it onto release refs.
