@@ -7,9 +7,6 @@ GitHub Action that automates Changesets releases: opens or updates a version PR 
 - Tech: TypeScript (ESM), Node >= 20, Yarn 1, Rollup+esbuild bundle, Vitest
 - Type: single-package GitHub Action (`@changesets/action`); remote may be a LiveViewTech fork of upstream `changesets/action`
 - Runtime entry: `action.yml` → `dist/index.js` (built from `src/index.ts`)
-- Subguides:
-  - `src/AGENTS.md` — action runtime
-  - `scripts/AGENTS.md` — self-release tooling
 
 ## Commands
 
@@ -30,15 +27,17 @@ CI runs `yarn typecheck` and `yarn test` via `.github/workflows/ci.yml` (setup: 
 ## Conventions
 
 - Version PRs use branch `changeset-release/<base>` (`src/run.ts`).
+- `commitMode` is `git-cli` (force-push) or `github-api` (`commitChangesFromRepo`, signed commits) (`src/git.ts`).
 - ESM only (`"type": "module"`); import local modules with `.ts` extensions (see `src/index.ts`).
 - `tsconfig.json`: `strict`, `verbatimModuleSyntax`, `noEmit` (typecheck only; ship via Rollup).
 - Do not commit `dist/` on feature branches — it is gitignored; release scripts force-add it onto release refs.
 - Action inputs/outputs are defined only in `action.yml`; keep README examples aligned when changing them.
+- Vitest fixtures: copy with `fixturez` and symlink root `node_modules` into the copy (`src/run.test.ts`).
 
 ## Directory Map
 
-- `src/` → see `src/AGENTS.md`
-- `scripts/` → see `scripts/AGENTS.md`
+- `src/` — action runtime (`index.ts`, `run.ts`, `git.ts`)
+- `scripts/` — self-release tooling (`bump.ts`, `release.ts`, `release-pr.ts`)
 - `__fixtures__/` — disposable Changesets workspaces for Vitest (`fixturez` copies)
 - `.github/` — CI, dogfood `version-or-publish`, `/release-pr` comment workflow
 - `action.yml` — marketplace/action interface
@@ -49,4 +48,5 @@ CI runs `yarn typecheck` and `yarn test` via `.github/workflows/ci.yml` (setup: 
 - **Force-push**: `git-cli` mode force-pushes the version branch (`src/git.ts`); release scripts force-push `vN` / `pr-release` (`scripts/release.ts`, `scripts/release-pr.ts`).
 - **Secrets on disk**: action writes `GITHUB_TOKEN` to `~/.netrc` and may write `NPM_TOKEN` into `~/.npmrc` (`src/index.ts`).
 - **Publish detection**: `runPublish` regex-matches `New tag:` lines in publish script stdout (`src/run.ts`); custom publish output can skip tags/releases.
+- **PR body size**: `getVersionPrBody` caps version PR bodies at 60k (`src/run.ts`).
 - **Clean checkout has no `dist/`**: consumers should use release branches/tags that contain the bundle, not raw `main`.
